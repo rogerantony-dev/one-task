@@ -8,7 +8,7 @@ export default function RootLayout() {
         headerTintColor: "#eee",
       }}
     >
-      <Stack.Screen name="index" options={{ title: "one-task" }} />
+      <Stack.Screen name="index" options={{ title: "REST" }} />
     </Stack>
   );
 }
