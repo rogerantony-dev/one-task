@@ -3,10 +3,21 @@ import * as Clipboard from "expo-clipboard";
 import { useState } from "react";
 import { buildHeaders, buildUrl } from "./requestUtils";
 import { initialRequest, initialUi, type Request, type Ui } from "./types";
+import { useCollectionContext } from "@/app/context/CollectionContext";
 
 export type FetchResult = Awaited<ReturnType<typeof fetchRequest>>;
 
+function resolveUrl(pathOrUrl: string, baseUrl: string): string {
+  const trimmed = pathOrUrl.trim();
+  if (!baseUrl) return trimmed;
+  if (trimmed.startsWith("http://") || trimmed.startsWith("https://")) return trimmed;
+  const path = trimmed.startsWith("/") ? trimmed : `/${trimmed}`;
+  const base = baseUrl.endsWith("/") ? baseUrl.slice(0, -1) : baseUrl;
+  return `${base}${path}`;
+}
+
 export function useApiTester() {
+  const { currentBaseUrl, currentCollectionId } = useCollectionContext();
   const [request, setRequest] = useState<Request>(initialRequest);
   const [ui, setUi] = useState<Ui>(initialUi);
   const [response, setResponse] = useState<FetchResult | null>(null);
@@ -28,7 +39,9 @@ export function useApiTester() {
     updateUi("loading", true);
     setResponse(null);
     try {
-      const finalUrl = buildUrl(request.url, request.params, apiKeyQuery);
+      const base = currentCollectionId != null ? currentBaseUrl : "";
+      const fullUrl = resolveUrl(request.url, base);
+      const finalUrl = buildUrl(fullUrl, request.params, apiKeyQuery);
       const headerRows = request.headers
         .filter((h) => h.key.trim())
         .map((h) => ({ key: h.key.trim(), value: h.value }));
@@ -93,6 +106,8 @@ export function useApiTester() {
     }
   }
 
+  const loadRequestData = (r: Request) => setRequest(r);
+
   return {
     request,
     ui,
@@ -103,5 +118,6 @@ export function useApiTester() {
     copyResponse,
     parsedJson,
     isJson,
+    loadRequestData,
   };
 }

@@ -11,6 +11,7 @@ type RequestBuilderProps = {
   updateRequest: <K extends keyof Request>(key: K, value: Request[K]) => void;
   updateUi: <K extends keyof Ui>(key: K, value: Ui[K]) => void;
   onSend: () => void;
+  urlPlaceholder?: string;
 };
 
 export function RequestBuilder({
@@ -19,6 +20,7 @@ export function RequestBuilder({
   updateRequest,
   updateUi,
   onSend,
+  urlPlaceholder = "https://api.example.com/endpoint",
 }: RequestBuilderProps) {
   return (
     <View style={s.section}>
@@ -39,7 +41,7 @@ export function RequestBuilder({
       </View>
       <TextInput
         style={s.urlInput}
-        placeholder="https://api.example.com/endpoint"
+        placeholder={urlPlaceholder}
         placeholderTextColor={colors.placeholder}
         value={request.url}
         onChangeText={(v) => updateRequest("url", v)}
